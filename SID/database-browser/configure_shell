@@ -1,7 +1,0 @@
-
-echo Setting JAVA_HOME and ANT_HOME environment variables.
-setenv ANT_HOME /home/sid/src/web/tools/apache-ant-1.7.0
-setenv JAVA_HOME /home/sid/src/web/tools/jdk
-setenv _JAVA_OPTIONS -Xmx1G
-echo Updating path to include java and ant.
-set path = ($ANT_HOME/bin/ $JAVA_HOME/bin/ $path)
