@@ -1,0 +1,58 @@
+<project name="SID Data Browser" default="compile" basedir=".">
+	<description>
+	  SID Data Browser.
+	  
+	  Written by: Scott Winegarden
+	  E-Mail: scottw@sun.stanford.edu
+	</description>
+	
+	<property name="web" location="web"/>
+	<property name="src" location="src"/>
+	<property name="manifest" location="MANIFEST.MF"/>
+	<property name="classes" location="${web}/WEB-INF/classes"/>
+	<property name="library" location="lib"/>
+	<property name="documentation" location="doc"/>
+	<property name="localization" location="localization"/>	
+	
+	<path id="compile.classpath">
+	  <fileset dir="${library}">
+	  	<include name="**/*.jar"/>
+	  </fileset>
+	</path>
+	
+	<target name="init">
+	  <mkdir dir="${classes}"/>
+	  <tstamp/>
+	</target>
+	
+	<target name="documentation" description="Create JavaDoc">
+	  <javadoc srcdir="${src}" destdir="${documentation}"></javadoc>
+	</target>
+	
+	<target name="compile" depends="init" description="Compile Source Code.">
+	  <javac includeantruntime="false" srcdir="${src}" destdir="${classes}">
+	    <classpath refid="compile.classpath"/>
+	  </javac>
+	  <copy todir="${classes}">
+	    <fileset dir="${localization}"/>
+	  </copy>
+	</target>
+	
+	<target name="war" depends="compile" description="Create WAR">
+	  <fileset dir="${web}">
+	    <include name="**/*"/>
+	  </fileset>
+	  <war destfile="database-browser.war" basedir="${web}" webxml="mynattconfig/web.xml">
+	    <classes dir="${classes}"/>
+	  </war>
+	</target>
+	
+	<target name="clean">
+	  <delete dir="${classes}"/>
+	</target>
+	
+	<target name="jar" depends="compile">
+	  <manifest file="${manifest}"/>
+	  <jar destfile="SDB.jar" basedir="${web}" manifest="${manifest}"/>
+	</target>
+</project>

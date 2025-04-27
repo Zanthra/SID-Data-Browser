@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+    
+    <description>
+    	This is the backend to the SID file Database which
+    	allows people to browse, filter, graph, and retrieve
+    	SID Data that is stored in a given directory.
+   	</description>
+   	
+   	<display-name>SID Data Browser</display-name>
+   	
+	<context-param>
+		<param-name>index-type</param-name>
+		<param-value>filesystem</param-value>
+	</context-param>
+	
+   	<context-param>
+   		<param-name>root-data-directory</param-name>
+   		<param-value>/usr/share/tomcat/webapps/database-browser/WEB-INF/resources/tempDataDir/</param-value>
+   	</context-param>
+	
+	<context-param>
+		<param-name>index-directory</param-name>
+		<param-value>/usr/share/tomcat/webapps/database-browser/WEB-INF/resources/index</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>update-interval</param-name>
+		<param-value>600000</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>index-log-directory</param-name>
+		<param-value>/usr/share/tomcat/webapps/database-browser/WEB-INF/resources/log/</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>goes-archive-directory</param-name>
+		<param-value>/home/sid/src/web/goes-events/</param-value>
+	</context-param>
+	
+   <servlet>
+   	<servlet-name>plot-sid</servlet-name>
+   	<servlet-class>edu.stanford.sid.PlotSid</servlet-class>
+   		
+	<init-param>
+		<param-name>gnuplot-binary</param-name>
+		<param-value>/web/solar-center/tomcat/database-browser/WEB-INF/resources/gnuplot</param-value>
+      </init-param>
+      <init-param>
+      	<param-name>gnuplot-configuration</param-name>
+      	<param-value>/web/solar-center/tomcat/database-browser/WEB-INF/resources/plot3.7.2</param-value>
+      </init-param>
+      
+      <init-param>
+        <param-name>public-directory</param-name>
+        <param-value>/web/solar-center/tomcat/database-browser/public</param-value>
+      </init-param>
+      <init-param>
+        <param-name>public-directory-visible</param-name>
+        <param-value>public</param-value>
+      </init-param>
+   </servlet>
+   	
+    <servlet>
+        <servlet-name>add-monitors-to-session</servlet-name>
+        <servlet-class>edu.stanford.sid.AddMonitorToSessionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>add-monitors-to-session</servlet-name>
+        <url-pattern>/AddMonitorToSession</url-pattern>
+    </servlet-mapping> 
+
+
+
+   <servlet-mapping>
+   	<servlet-name>plot-sid</servlet-name>
+   	<url-pattern>/plot</url-pattern>
+   </servlet-mapping>
+   	
+   <servlet-mapping>
+   	<servlet-name>plot-sid</servlet-name>
+   	<url-pattern>/retrieve</url-pattern>
+   </servlet-mapping>
+</web-app>
+   	
+   	
