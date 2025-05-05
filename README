@@ -4,18 +4,64 @@
 
 ## Installation
 
-For our system, we are using CentOS 8 x86_64 machine.
+For our system, we are using CentOS 8 machine.
 
 ### Prerequisites
 
 Here are the packages and versions we used for our installation:
 
 - java-devel [java-1.8.0-openjdk-devel]
-- Apache/httpd [httpd-2.4.37-65.0.1]
-- Apache Tomcat [tomcat-1:9.0.87-1]
+- Apache/httpd [httpd-2.4.37]
+- Apache Tomcat [tomcat-1:9.0.87]
 - [Apache ant](https://dlcdn.apache.org/ant/binaries/apache-ant-1.10.15-bin.tar.gz) [Version 1.10.15]
 - [JSOC-orig - DRMS](https://github.com/JSOC-SDP/JSOC-orig) [Version 10.0.0]
 
-### System Configuration
+### Initial System Configuration
 
+#### Java Configuration
+
+We configured the system to use the above version of java.
+This was configured with the "alternatives" system and choose the two versions mentioned above.
+To set the appropriate version, call `alternatives --config java` and `alternatives --config javac`.
+You will see something like what is below, where you can pick the java/javac versions.
+Just follow the instructions when prompted.
+
+```bash
+$ sudo alternatives --config java
+
+There are 2 programs which provide 'java'.
+
+  Selection    Command
+-----------------------------------------------
+*+ 1           java-1.8.0-openjdk.x86_64 (/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.452.b09-2.0.1.el8.x86_64/jre/bin/java)
+   2           java-11-openjdk.x86_64 (/usr/lib/jvm/java-11-openjdk-11.0.25.0.9-2.0.1.el8.x86_64/bin/java)
+
+Enter to keep the current selection[+], or type selection number:
+```
+
+### Compilation of SID Web Browser
+
+To compile this repo, `cd` to the location of the repo and directory `SID/database-browser`.
+Once in the directory, run the command `ant`.
+This should create a "classes" directory in the `web/WEB-INF` and compile the source code.
+
+
+## Runtime Configuration
+
+### JSOC/DRMS
+
+It is assumed the JSOC/DRMS packages have already been compiled and installed.
+However, if this hasn't been done, follow the instructions within the [JSOC-orig README](https://github.com/JSOC-SDP/JSOC-orig/tree/release/10.0.0).
+You will be provided an environment file with several JSOC-related env vars.
+This will be something like `drms-env-linux_avx.bash`, where `avx` is the machine architecture and `bash` is the shell.
+We provide both a CSH and BASH shell file for `x86_64`, `avx`, and `avx2`.
+We should only need the `show_info` binary, which will be in the `DRMS_BINS_INSTALL_DIR` env var.
+To setup the terminal to use this, locate the installation directory and add the following to your shell profile:
+
+```bash
+source /path/to/jsoc/install/drms-env-linux_avx.bash
+export PATH=$DRMS_BINS_INSTALL_DIR:$PATH
+```
+
+### Apache and Tomcat
 
