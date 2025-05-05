@@ -1,0 +1,21 @@
+# SID Data Browser
+
+*Add a discription*
+
+## Installation
+
+For our system, we are using CentOS 8 x86_64 machine.
+
+### Prerequisites
+
+Here are the packages and versions we used for our installation:
+
+- java-devel [java-1.8.0-openjdk-devel]
+- Apache/httpd [httpd-2.4.37-65.0.1]
+- Apache Tomcat [tomcat-1:9.0.87-1]
+- [Apache ant](https://dlcdn.apache.org/ant/binaries/apache-ant-1.10.15-bin.tar.gz) [Version 1.10.15]
+- [JSOC-orig - DRMS](https://github.com/JSOC-SDP/JSOC-orig) [Version 10.0.0]
+
+### System Configuration
+
+
