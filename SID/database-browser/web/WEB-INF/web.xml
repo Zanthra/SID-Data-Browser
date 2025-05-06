@@ -60,6 +60,11 @@
       	<param-name>gnuplot-configuration</param-name>
       	<param-value>/web/solar-center/tomcat/database-browser/WEB-INF/resources/plot3.7.2</param-value>
       </init-param>
+
+	  <init-param>
+	  	<param-name>retrieve-mode</param-name>
+		<param-value>copy</param-value>
+	  </init-param>
       
       <init-param>
         <param-name>public-directory</param-name>

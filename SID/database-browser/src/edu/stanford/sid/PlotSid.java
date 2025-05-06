@@ -50,6 +50,8 @@ extends HttpServlet
 	private Timer fileDeletionTimer;
     
     private static DataFileIndex index;
+
+	private boolean copyOnRetrieve = false;
     
     /**
      * Initializes the servlet with the values of the <init-param> entries in web.xml.
@@ -59,6 +61,7 @@ extends HttpServlet
     {
     	publicDirectory = new File(this.getInitParameter("public-directory"));
     	publicDirectoryVisible = this.getInitParameter("public-directory-visible");
+		copyOnRetrieve = "copy".equals(this.getInitParameter("retrieve-mode"));
         
         fileDeletionTimer = new java.util.Timer();
         
@@ -199,13 +202,23 @@ extends HttpServlet
     		{
     			response.setContentType("text/html");
     			PrintWriter out = response.getWriter();
-    			
-    			for(DataFile dataFile : files.getFiles())
-    			{
-    				out.println(makeLink(copyDataFile(dataFile), dataFile));
-    			}
-    			
-    			out.println("These files will remain avaliable for 5 minutes.");
+				if(copyOnRetrieve)
+				{
+	
+    				for(DataFile dataFile : files.getFiles())
+    				{
+	    				out.println(makeLink(copyDataFile(dataFile), dataFile));
+    				}
+	
+    				out.println("These files will remain avaliable for 5 minutes.");
+				}
+				else
+				{
+    				for(DataFile dataFile : files.getFiles())
+    				{
+	    				out.println(makeLink(dataFile.getFile().getPath(), dataFile));
+    				}
+				}
     		}else if(request.getServletPath().equals("/plot"))
     		{
     			edu.stanford.sid.graphing.Graph grapher = new edu.stanford.sid.graphing.Graph(files,
