@@ -1,0 +1,5 @@
+# Ant specific compilation time files
+.ant-targets-build.xml
+
+# Compiled targets
+SID/database-browser/web/WEB-INF/classes
