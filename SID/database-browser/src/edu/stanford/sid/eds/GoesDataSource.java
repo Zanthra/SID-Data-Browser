@@ -28,10 +28,14 @@ import net.sf.ehcache.*;
 public class GoesDataSource
 {
 	private static final String ARCHIVE_FILE_FORMAT = "yyyy'_events/'yyyyMMdd'events.txt'";
-	private static final String GOES_URL_DATE_FORMAT = "yyyy'/'yyyy'_events/'yyyyMMdd'events.txt'";
-	private static final String GOES_URL_FORMAT = "http://www.swpc.noaa.gov/ftpdir/warehouse/%s";
+	private static final String GOES_URL_DATE_FORMAT = "yyyyMMdd'events.txt'";
+	private String goesBaseUrl; //"ftp://ftp.swpc.noaa.gov/pub/indices/events/";
+	private String goesUrlFormat;
 	
 	private File _goesArchiveDirectory;
+
+	private boolean enableGoesLocal = false;
+	private boolean enableGoesRemote = false;
 	
 	private Cache goesFileCache;
 	
@@ -50,11 +54,20 @@ public class GoesDataSource
 	 */
 	private GoesDataSource(ServletContext context)
 	{
+		enableGoesLocal = "true".equals(context.getInitParameter("enable-goes-local"));
+		enableGoesRemote = "true".equals(context.getInitParameter("enable-goes-remote"));
+
 		if(context.getInitParameter("goes-archive-directory") != null)
 		{
 			_goesArchiveDirectory = new File(context.getInitParameter("goes-archive-directory"));
 		}
-		
+		if(context.getInitParameter("goes-remote-url") != null)
+		{
+			goesBaseUrl = context.getInitParameter("goes-remote-url");
+			goesUrlFormat = goesBaseUrl + "/%s";
+		}
+
+
 		CacheManager manager = CacheManager.create();
 		if(manager.getCache("goesFileCache") == null)
             manager.addCache(new Cache("goesFileCache", 40, false, false, 3600, 3600));
@@ -73,16 +86,26 @@ public class GoesDataSource
 	throws IOException
 	{
 		DateFormat archiveDateFormat = CalendarUtil.getSimpleDateFormat(ARCHIVE_FILE_FORMAT);
-		File archiveFile = new File(_goesArchiveDirectory, archiveDateFormat.format(date.getTime()));
+		File archiveFile = null;
+
+		if(enableGoesLocal)
+		{
+			archiveFile = new File(_goesArchiveDirectory, archiveDateFormat.format(date.getTime()));
 		
-		DateFormat urlFormat = CalendarUtil.getSimpleDateFormat(GOES_URL_DATE_FORMAT);
+		}
 		
 		//If said file does not exist, connect to the web and download the file.
-		if(!archiveFile.exists())
+		if(enableGoesRemote && (archiveFile == null || !archiveFile.exists()))
 		{
-			URL goesFileURL = new URL(String.format(GOES_URL_FORMAT, urlFormat.format(date.getTime())));
+			DateFormat urlFormat = CalendarUtil.getSimpleDateFormat(GOES_URL_DATE_FORMAT);
+			URL goesFileURL = new URL(String.format(goesUrlFormat, urlFormat.format(date.getTime())));
 			
 			return goesFileURL.openConnection().getInputStream();
+		}
+
+		if(archiveFile == null)
+		{
+			throw new IOException("Cannot load goes file.");
 		}
 		
 		return new FileInputStream(archiveFile);

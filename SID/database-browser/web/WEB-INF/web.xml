@@ -48,6 +48,20 @@
 		<param-value>/home/sid/src/web/goes-events/</param-value>
 	</context-param>
 	
+	<context-param>
+		<param-name>enable-goes-local</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>enable-goes-remote</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>goes-remote-url</param-name>
+		<param-value>ftp://ftp.swpc.noaa.gov/pub/warehouse/</param-value>
+	</context-param>
+
+
    <servlet>
    	<servlet-name>plot-sid</servlet-name>
    	<servlet-class>edu.stanford.sid.PlotSid</servlet-class>
