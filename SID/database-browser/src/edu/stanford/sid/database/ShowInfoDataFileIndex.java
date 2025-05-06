@@ -32,7 +32,6 @@ extends DataFileIndex
 	private static final String TIME_CONVERT_DATE_STRING = "yyyy.MM.dd_HH:mm:ss.SSS_Z";
 	private static final String SHOW_INFO_DATE_STRING = "yyyy.MM.dd_HH:mm:ss_Z";
 		
-	private static final String SHOW_INFO_EXECUTABLE = "/home/jsoc/cvs/JSOC/bin/linux_x86_64/show_info";
 
 	private static String DATA_SERIES_ID = "sid_awe.sid";
 	private static String MONITOR_SERIES_ID = "sid_awe.monitors";
@@ -44,6 +43,9 @@ extends DataFileIndex
 	private static final String SHOW_INFO_DATA_FORMAT_STRING = DATA_SERIES_ID + "[? UTC_EndTime > $(%s) and UTC_StartTime < $(%s) ?]";
 	
 	private static final int DEFAULT_SHOW_INFO_TIMEOUT = 30000;
+
+	
+	private String showInfoExecutable;
 	
 	// These are the Ehcache caches used to provide performance improvements.
 	private Cache transmitterCache;
@@ -108,6 +110,13 @@ extends DataFileIndex
 		{
 			DATA_SERIES_ID = context.getInitParameter("data-series-id");
 		}
+		
+		showInfoExecutable = context.getInitParameter("show_info-executable");
+
+		if(showInfoExecutable == null)
+		{
+			throw new RuntimeException("When using the show-info database you must include a show_info-executable path.");
+		}
 
 		createCaches();
 	}
@@ -129,7 +138,7 @@ extends DataFileIndex
 		{
 			try
 			{
-				String[] parameters = {SHOW_INFO_EXECUTABLE, String.format("sid_awe.transmitters[%s]", id), "-a"};
+				String[] parameters = {showInfoExecutable, String.format("sid_awe.transmitters[%s]", id), "-a"};
                 final Process showInfo = Runtime.getRuntime().exec(parameters);
                 setTimeout(showInfo, DEFAULT_SHOW_INFO_TIMEOUT);
 				
@@ -188,7 +197,7 @@ extends DataFileIndex
 		{
 			try
 			{
-				String[] parameters = {SHOW_INFO_EXECUTABLE, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1, SHOW_INFO_PARAMETER_2, SHOW_INFO_PARAMETER_3};
+				String[] parameters = {showInfoExecutable, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1, SHOW_INFO_PARAMETER_2, SHOW_INFO_PARAMETER_3};
 				
 				final Process showInfo = Runtime.getRuntime().exec(parameters);
 				setTimeout(showInfo, DEFAULT_SHOW_INFO_TIMEOUT);
@@ -267,8 +276,8 @@ extends DataFileIndex
 	{
 		ArrayList<MonitorInfo> monitors = new ArrayList<MonitorInfo>();
 
-		String[] monitorParameters = {SHOW_INFO_EXECUTABLE, "-a", MONITOR_SERIES_ID + "[? DataAvailable = $$1$$ ?]"};		
-		String[] siteParameters = {SHOW_INFO_EXECUTABLE, "-a", SITE_SERIES_ID + "[]"};
+		String[] monitorParameters = {showInfoExecutable, "-a", MONITOR_SERIES_ID + "[? DataAvailable = $$1$$ ?]"};		
+		String[] siteParameters = {showInfoExecutable, "-a", SITE_SERIES_ID + "[]"};
 		
 		Element monitorElement = monitorCache.get("monitors");
 		
@@ -281,7 +290,7 @@ extends DataFileIndex
         		final Process siteProcess = Runtime.getRuntime().exec(siteParameters);
     			setTimeout(siteProcess, DEFAULT_SHOW_INFO_TIMEOUT);
 
-				String[] stationParameters = {SHOW_INFO_EXECUTABLE, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (MonitorID, Site, StationID) recnum from " + DATA_SERIES_ID + ") ?]"};
+				String[] stationParameters = {showInfoExecutable, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (MonitorID, Site, StationID) recnum from " + DATA_SERIES_ID + ") ?]"};
 				
 				final Process stationProcess = Runtime.getRuntime().exec(stationParameters);
 				setTimeout(stationProcess, DEFAULT_SHOW_INFO_TIMEOUT);
@@ -381,7 +390,7 @@ extends DataFileIndex
 	{
 		java.util.TreeSet<Calendar> daysWithData = new java.util.TreeSet<Calendar>();
 		
-		String[] calendarParameters = {SHOW_INFO_EXECUTABLE, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (UTC_StartTime,UTC_EndTime) recnum from " + DATA_SERIES_ID + " " + generateMonitorFilter(monitors, true) + ") ?]"};
+		String[] calendarParameters = {showInfoExecutable, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (UTC_StartTime,UTC_EndTime) recnum from " + DATA_SERIES_ID + " " + generateMonitorFilter(monitors, true) + ") ?]"};
 		
 		DateFormat showInfoFormat = CalendarUtil.getSimpleDateFormat(SHOW_INFO_DATE_STRING);
 		
@@ -459,7 +468,7 @@ extends DataFileIndex
 		try
 		{
 			DateFormat timeConvertFormat = CalendarUtil.getSimpleDateFormat(TIME_CONVERT_DATE_STRING);
-			String[] parameters = {SHOW_INFO_EXECUTABLE, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1};
+			String[] parameters = {showInfoExecutable, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1};
 			
 			final Process showInfo = Runtime.getRuntime().exec(parameters);
 			setTimeout(showInfo, 30000);

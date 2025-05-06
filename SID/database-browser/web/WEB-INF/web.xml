@@ -17,6 +17,11 @@
 		<param-name>index-type</param-name>
 		<param-value>filesystem</param-value>
 	</context-param>
+
+	<context-param>
+		<param-name>show_info-executable</param-name>
+		<param-value>/home/jsoc/cvs/JSOC/bin/linux_x86_64/show_info</param-value>
+	</context-param>
 	
    	<context-param>
    		<param-name>root-data-directory</param-name>
