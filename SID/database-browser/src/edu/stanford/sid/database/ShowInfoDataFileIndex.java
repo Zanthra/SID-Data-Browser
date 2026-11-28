@@ -46,6 +46,7 @@ extends DataFileIndex
 
 	
 	private String showInfoExecutable;
+	private String additionalShowInfoParameter = "";
 	
 	// These are the Ehcache caches used to provide performance improvements.
 	private Cache transmitterCache;
@@ -110,6 +111,11 @@ extends DataFileIndex
 		{
 			DATA_SERIES_ID = context.getInitParameter("data-series-id");
 		}
+
+		if(context.getInitParameter("show_info-options") != null)
+		{
+			additionalShowInfoParameter = context.getInitParameter("show_info-options");
+		}
 		
 		showInfoExecutable = context.getInitParameter("show_info-executable");
 
@@ -138,7 +144,7 @@ extends DataFileIndex
 		{
 			try
 			{
-				String[] parameters = {showInfoExecutable, String.format("sid_awe.transmitters[%s]", id), "-a"};
+				String[] parameters = {showInfoExecutable, additionalShowInfoParameter, String.format("sid_awe.transmitters[%s]", id), "-a"};
                 final Process showInfo = Runtime.getRuntime().exec(parameters);
                 setTimeout(showInfo, DEFAULT_SHOW_INFO_TIMEOUT);
 				
@@ -197,7 +203,7 @@ extends DataFileIndex
 		{
 			try
 			{
-				String[] parameters = {showInfoExecutable, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1, SHOW_INFO_PARAMETER_2, SHOW_INFO_PARAMETER_3};
+				String[] parameters = {showInfoExecutable, additionalShowInfoParameter, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1, SHOW_INFO_PARAMETER_2, SHOW_INFO_PARAMETER_3};
 				
 				final Process showInfo = Runtime.getRuntime().exec(parameters);
 				setTimeout(showInfo, DEFAULT_SHOW_INFO_TIMEOUT);
@@ -276,8 +282,8 @@ extends DataFileIndex
 	{
 		ArrayList<MonitorInfo> monitors = new ArrayList<MonitorInfo>();
 
-		String[] monitorParameters = {showInfoExecutable, "-a", MONITOR_SERIES_ID + "[? DataAvailable = $$1$$ ?]"};		
-		String[] siteParameters = {showInfoExecutable, "-a", SITE_SERIES_ID + "[]"};
+		String[] monitorParameters = {showInfoExecutable, additionalShowInfoParameter, "-a", MONITOR_SERIES_ID + "[? DataAvailable = $$1$$ ?]"};		
+		String[] siteParameters = {showInfoExecutable, additionalShowInfoParameter, "-a", SITE_SERIES_ID + "[]"};
 		
 		Element monitorElement = monitorCache.get("monitors");
 		
@@ -290,7 +296,7 @@ extends DataFileIndex
         		final Process siteProcess = Runtime.getRuntime().exec(siteParameters);
     			setTimeout(siteProcess, DEFAULT_SHOW_INFO_TIMEOUT);
 
-				String[] stationParameters = {showInfoExecutable, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (MonitorID, Site, StationID) recnum from " + DATA_SERIES_ID + ") ?]"};
+				String[] stationParameters = {showInfoExecutable, additionalShowInfoParameter, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (X.MonitorID, X.Site, X.StationID) recnum from " + DATA_SERIES_ID + " X) ?]"};
 				
 				final Process stationProcess = Runtime.getRuntime().exec(stationParameters);
 				setTimeout(stationProcess, DEFAULT_SHOW_INFO_TIMEOUT);
@@ -390,7 +396,7 @@ extends DataFileIndex
 	{
 		java.util.TreeSet<Calendar> daysWithData = new java.util.TreeSet<Calendar>();
 		
-		String[] calendarParameters = {showInfoExecutable, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (UTC_StartTime,UTC_EndTime) recnum from " + DATA_SERIES_ID + " " + generateMonitorFilter(monitors, true) + ") ?]"};
+		String[] calendarParameters = {showInfoExecutable, additionalShowInfoParameter, "-a", DATA_SERIES_ID + "[? recnum in (select distinct on (X.UTC_StartTime,X.UTC_EndTime) recnum from " + DATA_SERIES_ID + " X " + generateMonitorFilter(monitors, true) + ") ?]"};
 		
 		DateFormat showInfoFormat = CalendarUtil.getSimpleDateFormat(SHOW_INFO_DATE_STRING);
 		
@@ -468,7 +474,7 @@ extends DataFileIndex
 		try
 		{
 			DateFormat timeConvertFormat = CalendarUtil.getSimpleDateFormat(TIME_CONVERT_DATE_STRING);
-			String[] parameters = {showInfoExecutable, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1};
+			String[] parameters = {showInfoExecutable, additionalShowInfoParameter, String.format(SHOW_INFO_DATA_FORMAT_STRING, timeConvertFormat.format(startTime.getTime()), timeConvertFormat.format(endTime.getTime())), SHOW_INFO_PARAMETER_1};
 			
 			final Process showInfo = Runtime.getRuntime().exec(parameters);
 			setTimeout(showInfo, 30000);
@@ -554,25 +560,25 @@ extends DataFileIndex
 			
 			for(int i = 0;i < monitors.length - 1;i++)
 			{
-				monitorFilter = monitorFilter + "(MonitorID=" + ss +
+				monitorFilter = monitorFilter + "(X.MonitorID=" + ss +
 					monitors[i].getMonitor() + ss +
-					" AND Site=" + ss +
+					" AND X.Site=" + ss +
 					monitors[i].getSite();
 				
 				//If there are not multiple stations this monitor is looking for, add
 				//the station to the selection.
 				if(!monitors[i].getStation().equalsIgnoreCase("multiple"))
-					monitorFilter = monitorFilter + ss + " AND StationID=" + ss +
+					monitorFilter = monitorFilter + ss + " AND X.StationID=" + ss +
 						monitors[i].getStation();
 				monitorFilter = monitorFilter + ss + ") OR ";
 			}
 			
-			monitorFilter = monitorFilter + "MonitorID=" + ss +
+			monitorFilter = monitorFilter + "X.MonitorID=" + ss +
 				monitors[monitors.length - 1].getMonitor() + ss +
-				" AND Site="+ ss +
+				" AND X.Site="+ ss +
 				monitors[monitors.length - 1].getSite();
 			if(!monitors[monitors.length - 1].getStation().equalsIgnoreCase("multiple"))
-				monitorFilter = monitorFilter + ss + " AND StationID=" + ss +
+				monitorFilter = monitorFilter + ss + " AND X.StationID=" + ss +
 					monitors[monitors.length - 1].getStation();
 			monitorFilter = monitorFilter + ss + ")";
 		}
